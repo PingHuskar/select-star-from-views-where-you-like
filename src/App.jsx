@@ -4,6 +4,7 @@ import './App.css'
 function App() {
   const [select, setSelect] = useState(localStorage.getItem(`select`) || '*')
   const [view, setView] = useState(localStorage.getItem(`view`) || '')
+  const [template, setTemplate] = useState(localStorage.getItem(`template`) || 'SQLITE')
   const [where, setWhere] = useState(localStorage.getItem(`where`) || '1 = 1')
   const [orderby, setOrderby] = useState(localStorage.getItem(`orderby`) || '(SELECT 0)')
   const [limit, setLimit] = useState(localStorage.getItem(`limit`) || 5000)
@@ -124,8 +125,8 @@ function App() {
           <label htmlFor="limit">LIMIT</label>
           <input type="number" id='limit' style={{width: "370px"}} onInput={(e) => {
           e.preventDefault()
-          if (!e.currentTarget.value) {
-            localStorage.setItem(`limit`,5000)
+          if (!e.currentTarget.value || parseInt(e.currentTarget.value) < 0) {
+            localStorage.setItem(`limit`, 5000)
           } else {
             localStorage.setItem(`limit`, e.currentTarget.value)
           }
@@ -136,13 +137,29 @@ function App() {
           <label htmlFor="offset">OFFSET</label>
           <input type="number" id='offset' style={{width: "370px"}} onInput={(e) => {
           e.preventDefault()
-          if (!e.currentTarget.value) {
+          if (!e.currentTarget.value || parseInt(e.currentTarget.value) < 0) {
             localStorage.setItem(`offset`, 0)
+            setView(view)
           } else {
             localStorage.setItem(`offset`, e.currentTarget.value)
+            setView(view)
           }
           setOffset(localStorage.getItem(`offset`))
         }} value={offset} />
+        </div>
+        <div className='queryType'>
+          <div onClick={(e) => {
+            e.preventDefault()
+            localStorage.setItem(`template`,`SQLITE`)
+            setTemplate(localStorage.getItem(`template`))
+            }
+          }>SQLITE</div>
+          <div onClick={(e) => {
+            e.preventDefault()
+            localStorage.setItem(`template`,`SSMS`)
+            setTemplate(localStorage.getItem(`template`))
+            }
+          }>SSMS</div>
         </div>
       </div>
       {/* <div className="split"></div> */}
@@ -150,14 +167,26 @@ function App() {
       <div className='output'>
         {view.split('\n').map((v,i) => {
           if (v) {
-            return <div className='outitem' key={i}>
-              SELECT {select} <br /> 
-              FROM {v} <br /> 
-              WHERE {where} <br /> 
-              ORDER BY {orderby} <br /> 
-              LIMIT {limit} <br /> 
-              OFFSET {offset};
-            </div>
+            switch (template) {
+              case "SQLITE":
+                return <div className='outitem' key={i}>
+                  SELECT {select} <br /> 
+                  FROM {v} <br /> 
+                  WHERE {where} <br /> 
+                  ORDER BY {orderby} <br /> 
+                  LIMIT {limit} <br /> 
+                  OFFSET {offset};
+                </div>
+              case "SSMS":
+                return <div className='outitem' key={i}>
+                  SELECT {select} <br /> 
+                  FROM {v} <br /> 
+                  WHERE {where} <br /> 
+                  ORDER BY {orderby} <br />
+                  OFFSET {offset} ROWS<br /> 
+                  FETCH NEXT {limit} ROWS ONLY;
+                </div>
+              }
           }
         }
         )}

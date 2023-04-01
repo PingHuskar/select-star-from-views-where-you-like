@@ -75,3 +75,15 @@
     }
   }
 }
+
+.queryType {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  padding: 5px 0;
+  div:hover {
+    text-decoration: underline;
+  }
+}

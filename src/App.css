@@ -77,4 +77,16 @@
 }
 .output .outitem::marker {
   background: red;
+}
+
+.queryType {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  padding: 5px 0;
+}
+.queryType div:hover {
+  text-decoration: underline;
 }/*# sourceMappingURL=App.css.map */
