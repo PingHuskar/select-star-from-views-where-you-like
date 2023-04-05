@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import './App.css'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const [select, setSelect] = useState(localStorage.getItem(`select`) || '*')
@@ -9,6 +11,38 @@ function App() {
   const [orderby, setOrderby] = useState(localStorage.getItem(`orderby`) || '(SELECT 0)')
   const [limit, setLimit] = useState(localStorage.getItem(`limit`) || 5000)
   const [offset, setOffset] = useState(localStorage.getItem(`offset`) || 0)
+  function genQueryString() {
+    let retString = ``
+    view.split('\n').map((v,i) => {
+      console.log(v,select)
+      if (v) {
+        switch (template) {
+          case "SQLITE":
+            retString += `
+SELECT ${select} 
+FROM ${v} 
+WHERE ${where} 
+ORDER BY ${orderby} 
+LIMIT ${limit} 
+OFFSET ${offset};
+`
+            break
+          case "SSMS":
+            retString += `
+SELECT ${select} 
+FROM ${v} 
+WHERE ${where} 
+ORDER BY ${orderby}
+OFFSET ${offset} ROWS
+FETCH NEXT ${limit} ROWS ONLY;
+`
+            break
+          }
+      }
+    }
+    )
+    return retString
+  }
 
   return (
     <div className="App">
@@ -161,6 +195,13 @@ function App() {
             }
           }>SSMS</div>
         </div>
+        <div style={{display: `flex`, justifyContent: `space-evenly`, width: `100%`}}>
+        <button onClick={(e) => {
+          e.preventDefault()
+          navigator.clipboard.writeText(genQueryString())
+          toast(`Query Copied`)
+        }}>Copy Query</button>
+        </div>
       </div>
       {/* <div className="split"></div> */}
       <hr />
@@ -191,6 +232,7 @@ function App() {
         }
         )}
       </div>
+      <ToastContainer />
     </div>
   )
 }
